@@ -3,6 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 
 pub struct Instruction<'a> {
     pub name: &'a str,
+    pub addr_name: &'a str,
     pub operation: Box<dyn FnMut() -> u8 + 'a>,
     pub address_mode: Box<dyn FnMut() -> u8 + 'a>,
     pub cycles: u8,
@@ -14,13 +15,14 @@ pub struct LookUpTable<'a> {
 }
 
 impl<'a> LookUpTable<'a> {
-    pub fn new(cpu: Rc<RefCell<Cpu>>) -> LookUpTable<'a> {
+    pub fn new(cpu: &'a Rc<RefCell<Cpu>>) -> LookUpTable<'a> {
         LookUpTable {
             table: vec![
                 //ROW 0
                 Instruction {
                     name: "BRK",
                     cycles: 7,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().BRK())
@@ -33,6 +35,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ORA",
                     cycles: 6,
+                    addr_name: "INDX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ORA())
@@ -45,6 +48,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -57,6 +61,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -69,6 +74,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -81,6 +87,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ORA",
                     cycles: 3,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ORA())
@@ -93,6 +100,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ASL",
                     cycles: 5,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ASL())
@@ -105,6 +113,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -117,6 +126,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "PHP",
                     cycles: 3,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().PHP())
@@ -129,6 +139,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ORA",
                     cycles: 2,
+                    addr_name: "IMM",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ORA())
@@ -141,6 +152,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ASL",
                     cycles: 2,
+                    addr_name: "ACC",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ASL())
@@ -153,6 +165,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -165,6 +178,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -177,6 +191,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ORA",
                     cycles: 4,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ORA())
@@ -189,6 +204,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ASL",
                     cycles: 6,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ASL())
@@ -201,6 +217,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -214,6 +231,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "BPL",
                     cycles: 2,
+                    addr_name: "REL",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().BPL())
@@ -226,6 +244,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ORA",
                     cycles: 5,
+                    addr_name: "INDY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ORA())
@@ -238,6 +257,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -250,6 +270,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -262,6 +283,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -274,6 +296,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ORA",
                     cycles: 4,
+                    addr_name: "ZPX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ORA())
@@ -286,6 +309,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ASL",
                     cycles: 6,
+                    addr_name: "ZPX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ASL())
@@ -298,6 +322,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -310,6 +335,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CLC",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CLC())
@@ -322,6 +348,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ORA",
                     cycles: 4,
+                    addr_name: "ABSY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ORA())
@@ -334,6 +361,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -346,6 +374,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -358,6 +387,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -370,6 +400,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ORA",
                     cycles: 4,
+                    addr_name: "ABSX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ORA())
@@ -382,6 +413,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ASL",
                     cycles: 7,
+                    addr_name: "ABSX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ASL())
@@ -394,6 +426,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -407,6 +440,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "JSR",
                     cycles: 6,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().JSR())
@@ -419,6 +453,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "AND",
                     cycles: 6,
+                    addr_name: "INDX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().AND())
@@ -431,6 +466,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -443,6 +479,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -455,6 +492,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "BIT",
                     cycles: 3,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().BIT())
@@ -467,6 +505,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "AND",
                     cycles: 3,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().AND())
@@ -479,6 +518,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ROL",
                     cycles: 5,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ROL())
@@ -491,6 +531,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -503,6 +544,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "PLP",
                     cycles: 4,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().PLP())
@@ -515,6 +557,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "AND",
                     cycles: 2,
+                    addr_name: "IMM",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().AND())
@@ -527,6 +570,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ROL",
                     cycles: 2,
+                    addr_name: "ACC",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ROL())
@@ -539,6 +583,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -551,6 +596,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "BIT",
                     cycles: 4,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().BIT())
@@ -563,6 +609,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "AND",
                     cycles: 4,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().AND())
@@ -575,6 +622,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ROL",
                     cycles: 6,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ROL())
@@ -587,6 +635,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -600,6 +649,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "BMI",
                     cycles: 2,
+                    addr_name: "REL",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().BMI())
@@ -612,6 +662,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "AND",
                     cycles: 5,
+                    addr_name: "INDY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().AND())
@@ -624,6 +675,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -636,6 +688,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -648,6 +701,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -660,6 +714,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "AND",
                     cycles: 4,
+                    addr_name: "ZPX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().AND())
@@ -672,6 +727,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ROL",
                     cycles: 6,
+                    addr_name: "ZPX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ROL())
@@ -684,6 +740,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -696,6 +753,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "SEC",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().SEC())
@@ -708,6 +766,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "AND",
                     cycles: 4,
+                    addr_name: "ABSY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().AND())
@@ -720,6 +779,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -732,6 +792,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -744,6 +805,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -756,6 +818,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "AND",
                     cycles: 4,
+                    addr_name: "ABSX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().AND())
@@ -768,6 +831,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ROL",
                     cycles: 7,
+                    addr_name: "ABSX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ROL())
@@ -780,6 +844,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -793,6 +858,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "RTI",
                     cycles: 6,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().RTI())
@@ -805,6 +871,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "EOR",
                     cycles: 6,
+                    addr_name: "INDX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().EOR())
@@ -817,6 +884,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -829,6 +897,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -841,6 +910,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -853,6 +923,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "EOR",
                     cycles: 3,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().EOR())
@@ -865,6 +936,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LSR",
                     cycles: 5,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LSR())
@@ -877,6 +949,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -889,6 +962,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "PHA",
                     cycles: 3,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().PHA())
@@ -901,6 +975,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "EOR",
                     cycles: 2,
+                    addr_name: "IMM",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().EOR())
@@ -913,6 +988,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LSR",
                     cycles: 2,
+                    addr_name: "ACC",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LSR())
@@ -925,6 +1001,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -937,6 +1014,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "JMP",
                     cycles: 3,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().JMP())
@@ -949,6 +1027,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "EOR",
                     cycles: 4,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().EOR())
@@ -961,6 +1040,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LSR",
                     cycles: 6,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LSR())
@@ -973,6 +1053,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -986,6 +1067,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "BVC",
                     cycles: 2,
+                    addr_name: "REL",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().BVC())
@@ -998,6 +1080,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "EOR",
                     cycles: 5,
+                    addr_name: "INDY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().EOR())
@@ -1010,6 +1093,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1022,6 +1106,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1034,6 +1119,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1046,6 +1132,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "EOR",
                     cycles: 4,
+                    addr_name: "ZPX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().EOR())
@@ -1058,6 +1145,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LSR",
                     cycles: 6,
+                    addr_name: "ZPX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LSR())
@@ -1070,6 +1158,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1082,6 +1171,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CLI",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CLI())
@@ -1094,6 +1184,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "EOR",
                     cycles: 4,
+                    addr_name: "ABSY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().EOR())
@@ -1106,6 +1197,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1118,6 +1210,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1130,6 +1223,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1142,6 +1236,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "EOR",
                     cycles: 4,
+                    addr_name: "ABSX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().EOR())
@@ -1154,6 +1249,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LSR",
                     cycles: 7,
+                    addr_name: "ABSX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LSR())
@@ -1166,6 +1262,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1179,6 +1276,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "RTS",
                     cycles: 6,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().RTS())
@@ -1191,6 +1289,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ADC",
                     cycles: 6,
+                    addr_name: "INDX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ADC())
@@ -1203,6 +1302,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1215,6 +1315,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1227,6 +1328,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1239,6 +1341,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ADC",
                     cycles: 3,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ADC())
@@ -1251,6 +1354,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ROR",
                     cycles: 5,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ROR())
@@ -1263,6 +1367,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1275,6 +1380,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "PLA",
                     cycles: 4,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().PLA())
@@ -1287,6 +1393,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ADC",
                     cycles: 2,
+                    addr_name: "IMM",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ADC())
@@ -1299,6 +1406,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ROR",
                     cycles: 2,
+                    addr_name: "ACC",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ROR())
@@ -1311,6 +1419,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1323,6 +1432,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "JMP",
                     cycles: 5,
+                    addr_name: "ABSIND",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().JMP())
@@ -1335,6 +1445,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ADC",
                     cycles: 4,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ADC())
@@ -1347,6 +1458,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ROR",
                     cycles: 6,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ROR())
@@ -1359,6 +1471,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1372,6 +1485,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "BVS",
                     cycles: 2,
+                    addr_name: "REL",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().BVS())
@@ -1384,6 +1498,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ADC",
                     cycles: 5,
+                    addr_name: "INDY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ADC())
@@ -1396,6 +1511,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1408,6 +1524,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1420,6 +1537,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1432,6 +1550,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ADC",
                     cycles: 4,
+                    addr_name: "ZPX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ADC())
@@ -1444,6 +1563,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ROR",
                     cycles: 6,
+                    addr_name: "ZPX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ROR())
@@ -1456,6 +1576,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1468,6 +1589,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "SEI",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().SEI())
@@ -1480,6 +1602,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ADC",
                     cycles: 4,
+                    addr_name: "ABSY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ADC())
@@ -1492,6 +1615,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1504,6 +1628,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1516,6 +1641,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1528,6 +1654,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ADC",
                     cycles: 4,
+                    addr_name: "ABSX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ADC())
@@ -1540,6 +1667,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "ROR",
                     cycles: 7,
+                    addr_name: "ABSX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().ROR())
@@ -1552,6 +1680,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1565,6 +1694,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1577,6 +1707,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "STA",
                     cycles: 6,
+                    addr_name: "INDX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().STA())
@@ -1589,6 +1720,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1601,6 +1733,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1613,6 +1746,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "STY",
                     cycles: 3,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().STY())
@@ -1625,6 +1759,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "STA",
                     cycles: 3,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().STA())
@@ -1637,6 +1772,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "STX",
                     cycles: 3,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().STX())
@@ -1649,6 +1785,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1661,6 +1798,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "DEY",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().DEY())
@@ -1673,6 +1811,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1685,6 +1824,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "TXA",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().TXA())
@@ -1697,6 +1837,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1709,6 +1850,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "STY",
                     cycles: 4,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().STY())
@@ -1721,6 +1863,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "STA",
                     cycles: 4,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().STA())
@@ -1733,6 +1876,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "STX",
                     cycles: 4,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().STX())
@@ -1745,6 +1889,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1758,6 +1903,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "BCC",
                     cycles: 2,
+                    addr_name: "REL",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().BCC())
@@ -1770,6 +1916,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "STA",
                     cycles: 6,
+                    addr_name: "INDY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().STA())
@@ -1782,6 +1929,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1794,6 +1942,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1806,6 +1955,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "STY",
                     cycles: 4,
+                    addr_name: "ZPX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().STY())
@@ -1818,6 +1968,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "STA",
                     cycles: 4,
+                    addr_name: "ZPX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().STA())
@@ -1830,6 +1981,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "STX",
                     cycles: 4,
+                    addr_name: "ZPY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().STX())
@@ -1842,6 +1994,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1854,6 +2007,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "TYA",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().TYA())
@@ -1866,6 +2020,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "STA",
                     cycles: 5,
+                    addr_name: "ABSY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().STA())
@@ -1878,6 +2033,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "TXS",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().TXS())
@@ -1890,6 +2046,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1902,6 +2059,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1914,6 +2072,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "STA",
                     cycles: 5,
+                    addr_name: "ABSX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().STA())
@@ -1926,6 +2085,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1938,6 +2098,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1951,6 +2112,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDY",
                     cycles: 2,
+                    addr_name: "IMM",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDY())
@@ -1963,6 +2125,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDA",
                     cycles: 6,
+                    addr_name: "INDX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDA())
@@ -1975,6 +2138,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDX",
                     cycles: 2,
+                    addr_name: "IMM",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDX())
@@ -1987,6 +2151,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -1999,6 +2164,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDY",
                     cycles: 3,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDY())
@@ -2011,6 +2177,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDA",
                     cycles: 3,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDA())
@@ -2023,6 +2190,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDX",
                     cycles: 3,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDX())
@@ -2035,6 +2203,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2047,6 +2216,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "TAY",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().TAY())
@@ -2059,6 +2229,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDA",
                     cycles: 2,
+                    addr_name: "IMM",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDA())
@@ -2071,6 +2242,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "TAX",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().TAX())
@@ -2083,6 +2255,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2095,6 +2268,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDY",
                     cycles: 4,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDY())
@@ -2107,6 +2281,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDA",
                     cycles: 4,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDA())
@@ -2119,6 +2294,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDX",
                     cycles: 4,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDX())
@@ -2131,6 +2307,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2144,6 +2321,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "BCS",
                     cycles: 2,
+                    addr_name: "REL",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().BCS())
@@ -2156,6 +2334,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDA",
                     cycles: 5,
+                    addr_name: "INDY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDA())
@@ -2168,6 +2347,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2180,6 +2360,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2192,6 +2373,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDY",
                     cycles: 4,
+                    addr_name: "ZPX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDY())
@@ -2204,6 +2386,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDA",
                     cycles: 4,
+                    addr_name: "ZPX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDA())
@@ -2216,6 +2399,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDX",
                     cycles: 4,
+                    addr_name: "ZPY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDX())
@@ -2228,6 +2412,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2240,6 +2425,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CLV",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CLV())
@@ -2252,6 +2438,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDA",
                     cycles: 4,
+                    addr_name: "ABSY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDA())
@@ -2264,6 +2451,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "TSX",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().TSX())
@@ -2276,6 +2464,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2288,6 +2477,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDY",
                     cycles: 4,
+                    addr_name: "ABSX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDY())
@@ -2300,6 +2490,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDA",
                     cycles: 4,
+                    addr_name: "ABSX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDA())
@@ -2312,6 +2503,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "LDX",
                     cycles: 4,
+                    addr_name: "ABSY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().LDX())
@@ -2324,6 +2516,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2337,6 +2530,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CPY",
                     cycles: 2,
+                    addr_name: "IMM",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CPY())
@@ -2349,6 +2543,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CMP",
                     cycles: 6,
+                    addr_name: "INDX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CMP())
@@ -2361,6 +2556,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2373,6 +2569,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2385,6 +2582,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CPY",
                     cycles: 3,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CPY())
@@ -2397,6 +2595,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CMP",
                     cycles: 3,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CMP())
@@ -2409,6 +2608,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "DEC",
                     cycles: 5,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().DEC())
@@ -2421,6 +2621,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2433,6 +2634,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "INY",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().INY())
@@ -2445,6 +2647,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CMP",
                     cycles: 2,
+                    addr_name: "IMM",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CMP())
@@ -2457,6 +2660,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "DEX",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().DEX())
@@ -2469,6 +2673,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2481,6 +2686,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CPY",
                     cycles: 4,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CPY())
@@ -2493,6 +2699,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CMP",
                     cycles: 4,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CMP())
@@ -2505,6 +2712,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "DEC",
                     cycles: 6,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().DEC())
@@ -2517,6 +2725,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2530,6 +2739,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "BNE",
                     cycles: 2,
+                    addr_name: "REL",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().BNE())
@@ -2542,6 +2752,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CMP",
                     cycles: 5,
+                    addr_name: "INDY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CMP())
@@ -2554,6 +2765,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2566,6 +2778,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2578,6 +2791,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2590,6 +2804,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CMP",
                     cycles: 4,
+                    addr_name: "ZPX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CMP())
@@ -2602,6 +2817,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "DEC",
                     cycles: 6,
+                    addr_name: "ZPX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().DEC())
@@ -2614,6 +2830,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2626,6 +2843,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CLD",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CLD())
@@ -2638,6 +2856,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CMP",
                     cycles: 4,
+                    addr_name: "ABSY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CMP())
@@ -2650,6 +2869,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2662,6 +2882,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2674,6 +2895,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2686,6 +2908,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CMP",
                     cycles: 4,
+                    addr_name: "ABSX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CMP())
@@ -2698,6 +2921,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "DEC",
                     cycles: 7,
+                    addr_name: "ABSX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().DEC())
@@ -2710,6 +2934,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2723,6 +2948,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CPX",
                     cycles: 2,
+                    addr_name: "IMM",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CPX())
@@ -2735,6 +2961,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "SBC",
                     cycles: 6,
+                    addr_name: "INDX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().SBC())
@@ -2747,6 +2974,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2759,6 +2987,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2771,6 +3000,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CPX",
                     cycles: 3,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CPX())
@@ -2783,6 +3013,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "SBC",
                     cycles: 3,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().SBC())
@@ -2795,6 +3026,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "INC",
                     cycles: 5,
+                    addr_name: "ZP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().INC())
@@ -2807,6 +3039,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2819,6 +3052,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "INX",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().INX())
@@ -2831,6 +3065,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "SBC",
                     cycles: 2,
+                    addr_name: "IMM",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().SBC())
@@ -2843,6 +3078,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "NOP",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().NOP())
@@ -2855,6 +3091,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2867,6 +3104,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "CPX",
                     cycles: 4,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().CPX())
@@ -2879,6 +3117,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "SBC",
                     cycles: 4,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().SBC())
@@ -2891,6 +3130,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "INC",
                     cycles: 6,
+                    addr_name: "ABS",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().INC())
@@ -2903,6 +3143,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2916,6 +3157,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "BEQ",
                     cycles: 2,
+                    addr_name: "REL",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().BEQ())
@@ -2928,6 +3170,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "SBC",
                     cycles: 5,
+                    addr_name: "INDY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().SBC())
@@ -2940,6 +3183,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2952,6 +3196,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2964,6 +3209,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -2976,6 +3222,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "SBC",
                     cycles: 4,
+                    addr_name: "ZPX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().SBC())
@@ -2988,6 +3235,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "INC",
                     cycles: 6,
+                    addr_name: "ZPX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().INC())
@@ -3000,6 +3248,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -3012,6 +3261,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "SED",
                     cycles: 2,
+                    addr_name: "IMP",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().SED())
@@ -3024,6 +3274,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "SBC",
                     cycles: 4,
+                    addr_name: "ABSY",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().SBC())
@@ -3036,6 +3287,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -3048,6 +3300,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -3060,6 +3313,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
@@ -3072,6 +3326,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "SBC",
                     cycles: 4,
+                    addr_name: "ABSX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().SBC())
@@ -3084,6 +3339,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "INC",
                     cycles: 7,
+                    addr_name: "ABSX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().INC())
@@ -3096,6 +3352,7 @@ impl<'a> LookUpTable<'a> {
                 Instruction {
                     name: "???",
                     cycles: 0,
+                    addr_name: "XXX",
                     operation: {
                         let cpu_clone = Rc::clone(&cpu);
                         Box::new(move || cpu_clone.borrow_mut().XXX())
