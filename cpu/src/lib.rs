@@ -90,7 +90,7 @@ impl Cpu {
 
         cpu
     }
-  
+
     fn read(&mut self, addr: u16) -> u8 {
         self.bus.borrow_mut().read(addr, false)
     }
@@ -121,29 +121,29 @@ impl Cpu {
     //Immediate
     pub fn IMM(&mut self) -> u8 {
         self.addr_abs = self.pc + 1;
-        self.pc+=1;
+        self.pc += 1;
         0x00
     }
     //Absolute
     pub fn ABS(&mut self) -> u8 {
         let lo = self.read(self.pc) as u16;
-        self.pc+=1;
+        self.pc += 1;
         let hi = self.read(self.pc) as u16;
-        self.pc+=1;
+        self.pc += 1;
         self.addr_abs = (hi << 8) | lo;
         0x00
     }
     //Zero page
     pub fn ZP(&mut self) -> u8 {
         self.addr_abs = self.read(self.pc) as u16;
-        self.pc+=1;
+        self.pc += 1;
         self.addr_abs &= 0x00FF;
         0x00
     }
     //Indirect zero page X
     pub fn ZPX(&mut self) -> u8 {
         self.addr_abs = (self.read(self.pc) + self.x) as u16;
-        self.pc+=1;
+        self.pc += 1;
         self.addr_abs &= 0x00FF;
         0x00
     }
@@ -151,16 +151,16 @@ impl Cpu {
     //Indirect zero page Y
     pub fn ZPY(&mut self) -> u8 {
         self.addr_abs = (self.read(self.pc) + self.y) as u16;
-        self.pc+=1;
+        self.pc += 1;
         self.addr_abs &= 0x00FF;
         0x00
     }
     //Indirect Absolute X
     pub fn ABSX(&mut self) -> u8 {
         let lo = self.read(self.pc) as u16;
-        self.pc+=1;
+        self.pc += 1;
         let hi = self.read(self.pc) as u16;
-        self.pc+=1;
+        self.pc += 1;
         self.addr_abs = (hi << 8) | lo;
         self.addr_abs += self.x as u16;
 
@@ -173,9 +173,9 @@ impl Cpu {
     //Indirect Absolute Y
     pub fn ABSY(&mut self) -> u8 {
         let lo = self.read(self.pc) as u16;
-        self.pc+=1;
+        self.pc += 1;
         let hi = self.read(self.pc) as u16;
-        self.pc+=1;
+        self.pc += 1;
         self.addr_abs = (hi << 8) | lo;
         self.addr_abs += self.y as u16;
 
@@ -192,7 +192,7 @@ impl Cpu {
     //Relative
     pub fn REL(&mut self) -> u8 {
         self.addr_rel = self.read(self.pc) as u16;
-        self.pc+=1;
+        self.pc += 1;
         if self.addr_rel & 0x80 == 1 {
             self.addr_rel |= 0xFF00;
         }
@@ -201,7 +201,7 @@ impl Cpu {
     //Indirect indexed x
     pub fn INDX(&mut self) -> u8 {
         let t = self.read(self.pc) as u16;
-        self.pc+=1;
+        self.pc += 1;
 
         let lo = self.read((t + self.x as u16) & 0x00FF) as u16;
         let hi = self.read((t + self.x as u16 + 1) & 0x00FF) as u16;
@@ -212,7 +212,7 @@ impl Cpu {
     //Indirect indexed y
     pub fn INDY(&mut self) -> u8 {
         let t = self.read(self.pc) as u16;
-        self.pc+=1;
+        self.pc += 1;
 
         let lo = self.read(t & 0x00FF) as u16;
         let hi = self.read((t + 1) & 0x00FF) as u16;
@@ -221,22 +221,21 @@ impl Cpu {
         self.addr_abs += self.y as u16;
 
         if (self.addr_abs & 0xFF00) != (hi << 8) {
-            return 1
+            return 1;
         }
         0x00
     }
     //Absolute indirect
     pub fn ABSIND(&mut self) -> u8 {
         let lo = self.read(self.pc) as u16;
-        self.pc +=1;
+        self.pc += 1;
         let hi = self.read(self.pc) as u16;
-        self.pc+=1;
+        self.pc += 1;
 
         let ptr = (hi << 8) | lo;
         if lo == 0xFF {
             self.addr_abs = ((self.read(ptr & 0xFF00) << 8) | self.read(ptr + 0)) as u16;
-        } 
-        else {
+        } else {
             self.addr_abs = (((self.read(ptr + 1)) << 8) | self.read(ptr + 1)) as u16;
         }
         0x00
@@ -253,7 +252,10 @@ impl Cpu {
         let n = ((temp & 0x00FF) as u8) & 0x80;
         self.set_flag(FLAGS::n(), n == 1);
         self.set_flag(FLAGS::z(), (temp & 0x00FF) == 0);
-        self.set_flag(FLAGS::v(), ((self.acc & 0x80) ^ n) & !((self.acc & 0x80) ^ (self.fetched & 0x80)) == 1);
+        self.set_flag(
+            FLAGS::v(),
+            ((self.acc & 0x80) ^ n) & !((self.acc & 0x80) ^ (self.fetched & 0x80)) == 1,
+        );
         self.acc = (temp & 0x00FF) as u8;
         0x01
     }
@@ -267,165 +269,419 @@ impl Cpu {
     }
 
     pub fn ASL(&mut self) -> u8 {
+        self.fetch();
+        let temp = (self.fetched as u16) << 1;
+        self.set_flag(FLAGS::c(), (temp & 0xFF00) > 0);
+        self.set_flag(FLAGS::n(), (temp & 0x0080) == 1);
+        self.set_flag(FLAGS::z(), (temp & 0x00FF) == 0x00);
+        if self.addr_mode_name == "IMP" {
+            self.acc = (temp & 0x00FF) as u8;
+        } else {
+            self.write(self.addr_abs, (temp & 0x00FF) as u8);
+        }
         0x00
     }
 
     pub fn BCC(&mut self) -> u8 {
+        if self.get_flag(FLAGS::c()) == 0 {
+            self.cycles += 1;
+
+            self.addr_abs = self.pc + self.addr_rel;
+
+            if (self.addr_abs & 0xFF00) != (self.pc & 0xFF00) {
+                self.cycles += 1;
+            }
+            self.pc = self.addr_abs
+        }
         0x00
     }
 
     pub fn BCS(&mut self) -> u8 {
+        if self.get_flag(FLAGS::c()) == 1 {
+            self.cycles += 1;
+
+            self.addr_abs = self.pc + self.addr_rel;
+
+            if (self.addr_abs & 0xFF00) != (self.pc & 0xFF00) {
+                self.cycles += 1;
+            }
+            self.pc = self.addr_abs
+        }
         0x00
     }
 
     pub fn BEQ(&mut self) -> u8 {
+        if self.get_flag(FLAGS::z()) == 0 {
+            self.cycles += 1;
+
+            self.addr_abs = self.pc + self.addr_rel;
+
+            if (self.addr_abs & 0xFF00) != (self.pc & 0xFF00) {
+                self.cycles += 1;
+            }
+            self.pc = self.addr_abs
+        }
         0x00
     }
 
     pub fn BIT(&mut self) -> u8 {
+        self.fetch();
+        let temp = self.acc & self.fetched;
+        self.set_flag(FLAGS::z(), (temp) == 0);
+        self.set_flag(FLAGS::n(), self.fetched & FLAGS::n() == 1);
+        self.set_flag(FLAGS::v(), self.fetched & FLAGS::v() == 1);
         0x00
     }
 
     pub fn BMI(&mut self) -> u8 {
+        if self.get_flag(FLAGS::n()) == 1 {
+            self.cycles += 1;
+
+            self.addr_abs = self.pc + self.addr_rel;
+
+            if (self.addr_abs & 0xFF00) != (self.pc & 0xFF00) {
+                self.cycles += 1;
+            }
+            self.pc = self.addr_abs
+        }
         0x00
     }
 
     pub fn BNE(&mut self) -> u8 {
+        if self.get_flag(FLAGS::z()) == 0 {
+            self.cycles += 1;
+
+            self.addr_abs = self.pc + self.addr_rel;
+
+            if (self.addr_abs & 0xFF00) != (self.pc & 0xFF00) {
+                self.cycles += 1;
+            }
+            self.pc = self.addr_abs
+        }
         0x00
     }
 
     pub fn BPL(&mut self) -> u8 {
+        if self.get_flag(FLAGS::n()) == 0 {
+            self.cycles += 1;
+
+            self.addr_abs = self.pc + self.addr_rel;
+
+            if (self.addr_abs & 0xFF00) != (self.pc & 0xFF00) {
+                self.cycles += 1;
+            }
+            self.pc = self.addr_abs
+        }
         0x00
     }
 
     pub fn BRK(&mut self) -> u8 {
+        self.pc += 1;
+
+        self.set_flag(FLAGS::i(), true);
+        self.write(0x0100 + self.sp as u16, ((self.pc & 0xFF00) >> 8) as u8);
+        self.sp -= 1;
+        self.write(0x0100 + self.sp as u16, (self.pc & 0x00FF) as u8);
+        self.sp -= 1;
+
+        self.set_flag(FLAGS::b(), true);
+        self.write(0x0100 + self.sp as u16, self.psr);
+        self.sp -= 1;
+
+        self.set_flag(FLAGS::b(), false);
+
+        self.pc = (self.read(0xFFFE) as u16) | ((self.read(0xFFFF) as u16) << 8);
+
         0x00
     }
 
     pub fn BVC(&mut self) -> u8 {
+        if self.get_flag(FLAGS::v()) == 0 {
+            self.cycles += 1;
+
+            self.addr_abs = self.pc + self.addr_rel;
+
+            if (self.addr_abs & 0xFF00) != (self.pc & 0xFF00) {
+                self.cycles += 1;
+            }
+            self.pc = self.addr_abs
+        }
         0x00
     }
 
     pub fn BVS(&mut self) -> u8 {
+        if self.get_flag(FLAGS::v()) == 1 {
+            self.cycles += 1;
+
+            self.addr_abs = self.pc + self.addr_rel;
+
+            if (self.addr_abs & 0xFF00) != (self.pc & 0xFF00) {
+                self.cycles += 1;
+            }
+            self.pc = self.addr_abs
+        }
         0x00
     }
 
     pub fn CLC(&mut self) -> u8 {
+        self.set_flag(FLAGS::c(), false);
         0x00
     }
 
     pub fn CLD(&mut self) -> u8 {
+        self.set_flag(FLAGS::d(), false);
         0x00
     }
     pub fn CLI(&mut self) -> u8 {
+        self.set_flag(FLAGS::i(), false);
         0x00
     }
 
     pub fn CLV(&mut self) -> u8 {
+        self.set_flag(FLAGS::v(), false);
         0x00
     }
 
     pub fn CMP(&mut self) -> u8 {
+        self.fetch();
+        let temp = self.acc as u16 - self.fetched as u16;
+        self.set_flag(FLAGS::z(), temp == 0);
+        self.set_flag(FLAGS::c(), self.acc >= self.fetched);
+        self.set_flag(FLAGS::n(), (temp & 0x0080) == 1);
         0x00
     }
 
     pub fn CPX(&mut self) -> u8 {
+        self.fetch();
+        let temp = self.x as u16 - self.fetched as u16;
+        self.set_flag(FLAGS::z(), temp == 0);
+        self.set_flag(FLAGS::c(), self.x >= self.fetched);
+        self.set_flag(FLAGS::n(), (temp & 0x0080) == 1);
         0x00
     }
 
     pub fn CPY(&mut self) -> u8 {
+        self.fetch();
+        let temp = self.y as u16 - self.fetched as u16;
+        self.set_flag(FLAGS::z(), temp == 0);
+        self.set_flag(FLAGS::c(), self.y >= self.fetched);
+        self.set_flag(FLAGS::n(), (temp & 0x0080) == 1);
         0x00
     }
 
     pub fn DEC(&mut self) -> u8 {
+        self.fetch();
+        let temp = self.fetched as u16 - 1;
+        self.write(self.addr_abs, (temp & 0x00FF) as u8);
+        self.set_flag(FLAGS::z(), temp == 0);
+        self.set_flag(FLAGS::n(), (temp & 0x0080) == 1);
         0x00
     }
 
     pub fn DEX(&mut self) -> u8 {
+        let temp = self.x as u16 - 1;
+        self.x = (temp & 0x00FF) as u8;
+        self.set_flag(FLAGS::z(), temp == 0);
+        self.set_flag(FLAGS::n(), (temp & 0x0080) == 1);
         0x00
     }
 
     pub fn DEY(&mut self) -> u8 {
+        let temp = self.y as u16 - 1;
+        self.y = (temp & 0x00FF) as u8;
+        self.set_flag(FLAGS::z(), temp == 0);
+        self.set_flag(FLAGS::n(), (temp & 0x0080) == 1);
         0x00
     }
 
     pub fn EOR(&mut self) -> u8 {
+        self.fetch();
+        let temp = self.acc ^ self.fetched;
+        self.acc = temp;
+        self.set_flag(FLAGS::n(), (temp & 0x80) == 1);
+        self.set_flag(FLAGS::z(), temp == 0x00);
         0x00
     }
 
     pub fn INC(&mut self) -> u8 {
+        self.fetch();
+
+        let temp = self.fetched as u16 + 1;
+        self.write(self.addr_abs, (temp & 0x00FF) as u8);
+        self.set_flag(FLAGS::z(), temp == 0);
+        self.set_flag(FLAGS::n(), (temp & 0x0080) == 1);
         0x00
     }
 
     pub fn INX(&mut self) -> u8 {
+        let temp = self.x as u16 + 1;
+        self.x = (temp & 0x00FF) as u8;
+        self.set_flag(FLAGS::z(), temp == 0);
+        self.set_flag(FLAGS::n(), (temp & 0x0080) == 1);
         0x00
     }
 
     pub fn INY(&mut self) -> u8 {
+        let temp = self.y as u16 + 1;
+        self.y = (temp & 0x00FF) as u8;
+        self.set_flag(FLAGS::z(), temp == 0);
+        self.set_flag(FLAGS::n(), (temp & 0x0080) == 1);
         0x00
     }
 
     pub fn JMP(&mut self) -> u8 {
+        self.pc = self.addr_abs;
         0x00
     }
 
     pub fn JSR(&mut self) -> u8 {
+        self.pc -= 1;
+        self.write(0x0100 + self.sp as u16, ((self.pc >> 8) & 0x00FF) as u8);
+        self.sp -= 1;
+        self.write(0x0100 + self.sp as u16, (self.pc & 0x00FF) as u8);
+        self.sp -= 1;
+
+        self.pc = self.addr_abs;
         0x00
     }
 
     pub fn LDA(&mut self) -> u8 {
+        self.fetch();
+
+        self.acc = self.fetched;
+        self.set_flag(FLAGS::z(), self.acc == 0x00);
+        self.set_flag(FLAGS::n(), (self.acc & 0x80) == 1);
         0x00
     }
 
     pub fn LDX(&mut self) -> u8 {
+        self.fetch();
+
+        self.x = self.fetched;
+        self.set_flag(FLAGS::z(), self.x == 0x00);
+        self.set_flag(FLAGS::n(), (self.x & 0x80) == 1);
         0x00
     }
 
     pub fn LDY(&mut self) -> u8 {
+        self.fetch();
+
+        self.y = self.fetched;
+        self.set_flag(FLAGS::z(), self.y == 0x00);
+        self.set_flag(FLAGS::n(), (self.y & 0x80) == 1);
         0x00
     }
 
     pub fn LSR(&mut self) -> u8 {
+        self.fetch();
+        self.set_flag(FLAGS::c(), (self.fetched as u16 & 0x0001) == 1);
+        let temp = (self.fetched as u16) >> 1;
+        self.set_flag(FLAGS::z(), temp == 0x0000);
+        self.set_flag(FLAGS::n(), (temp & 0x8000) == 1);
+
+        if self.addr_mode_name == "IMP" {
+            self.acc = (temp & 0x00FF) as u8;
+        } else {
+            self.write(self.addr_abs, (temp & 0x00FF) as u8);
+        }
+
         0x00
     }
 
     pub fn NOP(&mut self) -> u8 {
-        0x00
+        match self.opcode {
+            0x01C | 0x3C | 0x5C | 0x7C | 0xDC | 0xFC => return 0x01,
+            _ => return 0x00,
+        }
     }
 
     pub fn ORA(&mut self) -> u8 {
+        self.fetch();
+        self.acc = self.acc | self.fetched;
+        self.set_flag(FLAGS::z(), self.acc == 0);
+        self.set_flag(FLAGS::n(), (self.acc & 0x80) == 1);
         0x00
     }
 
     pub fn PHA(&mut self) -> u8 {
+        self.write(0x0100 + self.sp as u16, self.acc);
+        self.sp -= 1;
         0x00
     }
 
     pub fn PHP(&mut self) -> u8 {
+        self.write(0x0100 + self.sp as u16, self.psr | FLAGS::b() | FLAGS::u());
+        self.sp -= 1;
         0x00
     }
 
     pub fn PLA(&mut self) -> u8 {
+        self.sp += 1;
+        self.acc = self.read(0x0100 + self.sp as u16);
+        self.set_flag(FLAGS::z(), self.acc == 0);
+        self.set_flag(FLAGS::n(), (self.acc & 0x80) == 1);
         0x00
     }
 
     pub fn PLP(&mut self) -> u8 {
+        self.sp += 1;
+        self.psr = self.read(0x0100 + self.sp as u16);
+        self.set_flag(FLAGS::u(), true);
         0x00
     }
 
     pub fn ROL(&mut self) -> u8 {
+        self.fetch();
+        let temp = ((self.fetched as u16) << 1) | self.get_flag(FLAGS::c()) as u16;
+        self.set_flag(FLAGS::c(), (temp & 0xFF00) == 1);
+        self.set_flag(FLAGS::z(), (temp & 0x00FF) == 0);
+        self.set_flag(FLAGS::n(), (temp & 0x0080) == 1);
+
+        if self.addr_mode_name == "IMP" {
+            self.acc = (temp & 0x00FF) as u8;
+        } else {
+            self.write(self.addr_abs, (temp & 0x00FF) as u8);
+        }
+
         0x00
     }
 
     pub fn ROR(&mut self) -> u8 {
+        self.fetch();
+        let temp = ((self.fetched as u16) >> 1) | ((self.get_flag(FLAGS::c()) as u16) << 7);
+        self.set_flag(FLAGS::c(), (self.fetched & 0x01) == 1);
+        self.set_flag(FLAGS::z(), (temp & 0x00FF) == 0);
+        self.set_flag(FLAGS::n(), (temp & 0x0080) == 1);
+
+        if self.addr_mode_name == "IMP" {
+            self.acc = (temp & 0x00FF) as u8;
+        } else {
+            self.write(self.addr_abs, (temp & 0x00FF) as u8);
+        }
+
         0x00
     }
 
     pub fn RTI(&mut self) -> u8 {
+        self.sp += 1;
+        self.psr = self.read(0x0100 + self.sp as u16);
+        self.psr &= !FLAGS::b();
+        self.psr &= !FLAGS::u();
+        self.sp += 1;
+
+        self.pc = self.read(0x0100 + self.sp as u16) as u16;
+        self.sp += 1;
+        self.pc |= (self.read(0x0100 + self.sp as u16) as u16) << 8;
         0x00
     }
 
     pub fn RTS(&mut self) -> u8 {
+        self.sp += 1;
+
+        self.pc = self.read(0x0100 + self.sp as u16) as u16;
+        self.sp += 1;
+        self.pc |= (self.read(0x0100 + self.sp as u16) as u16) << 8;
+        self.pc += 1;
         0x00
     }
 
@@ -433,60 +689,85 @@ impl Cpu {
         self.fetch();
 
         let value = !self.fetched as u16;
-        let temp = self.acc as u16 + value + self.get_flag(FLAGS::c()) as u16; 
-        self.set_flag(FLAGS::c(), (temp & 0x00FF) == 1);
+        let temp = self.acc as u16 + value + self.get_flag(FLAGS::c()) as u16;
+        self.set_flag(FLAGS::c(), (temp & 0xFF00) == 1);
         self.set_flag(FLAGS::z(), (temp & 0x00FF) == 0);
         self.set_flag(FLAGS::n(), (temp & 0x0080) == 1);
-        self.set_flag(FLAGS::v(), ((temp ^ self.acc as u16) & (temp ^ value) & 0x0080) == 1);
+        self.set_flag(
+            FLAGS::v(),
+            ((temp ^ self.acc as u16) & (temp ^ value) & 0x0080) == 1,
+        );
         self.acc = (temp & 0x00FF) as u8;
         0x01
     }
 
     pub fn SEC(&mut self) -> u8 {
+        self.set_flag(FLAGS::c(), true);
         0x00
     }
 
     pub fn SED(&mut self) -> u8 {
+        self.set_flag(FLAGS::d(), true);
         0x00
     }
 
     pub fn SEI(&mut self) -> u8 {
+        self.set_flag(FLAGS::i(), true);
         0x00
     }
 
     pub fn STA(&mut self) -> u8 {
+        self.write(self.addr_abs, self.acc);
         0x00
     }
 
     pub fn STX(&mut self) -> u8 {
+        self.write(self.addr_abs, self.x);
         0x00
     }
 
     pub fn STY(&mut self) -> u8 {
+        self.write(self.addr_abs, self.y);
         0x00
     }
 
     pub fn TAX(&mut self) -> u8 {
+        self.x = self.acc;
+        self.set_flag(FLAGS::z(), self.x == 0x00);
+        self.set_flag(FLAGS::n(), (self.x & 0x80) == 1);
         0x00
     }
 
     pub fn TAY(&mut self) -> u8 {
+        self.y = self.acc;
+        self.set_flag(FLAGS::z(), self.y == 0x00);
+        self.set_flag(FLAGS::n(), (self.y & 0x80) == 1);
         0x00
     }
 
     pub fn TSX(&mut self) -> u8 {
+        self.x = self.sp;
+        self.set_flag(FLAGS::z(), self.x == 0x00);
+        self.set_flag(FLAGS::n(), (self.x & 0x80) == 1);
         0x00
     }
 
     pub fn TXA(&mut self) -> u8 {
+        self.acc = self.x;
+        self.set_flag(FLAGS::z(), self.acc == 0x00);
+        self.set_flag(FLAGS::n(), (self.acc & 0x80) == 1);
         0x00
     }
 
     pub fn TXS(&mut self) -> u8 {
+        self.sp = self.x;
         0x00
     }
 
     pub fn TYA(&mut self) -> u8 {
+        self.acc = self.y;
+        self.set_flag(FLAGS::z(), self.acc == 0x00);
+        self.set_flag(FLAGS::n(), (self.acc & 0x80) == 1);
         0x00
     }
 
@@ -588,5 +869,9 @@ impl Cpu {
             self.fetched = self.read(self.addr_abs);
         }
         self.fetched
+    }
+
+    pub fn complete(&mut self) -> bool {
+        self.cycles == 0
     }
 }
