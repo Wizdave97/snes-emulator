@@ -241,7 +241,7 @@ impl Cpu {
         0x00
     }
 
-    //Opcodes
+    //Instructions
 
     pub fn ADC(&mut self) -> u8 {
         self.fetch();
@@ -873,5 +873,106 @@ impl Cpu {
 
     pub fn complete(&mut self) -> bool {
         self.cycles == 0
+    }
+
+    pub fn disassemble(&mut self, start: u16, stop: u16, lookup: &LookUpTable) -> Vec<String> {
+        let mut map_lines: Vec<String> = Vec::new();
+        let mut value = 0x00u8;
+        let mut hi = 0x00u8;
+        let mut lo = 0x00u8;
+        let mut addr = start;
+        let mut line_addr = 0u16;
+
+        while addr <= stop {
+            line_addr = addr;
+            let mut map_line = String::new();
+
+            map_line.insert_str(map_line.len(), &format!("${:04x}: ", addr)[..]);
+            let opcode = self.read(addr);
+            addr += 1;
+            map_line.insert_str(
+                map_line.len(),
+                &format!("{} ", lookup.table[opcode as usize].name)[..],
+            );
+
+            if lookup.table[opcode as usize].addr_name == "IMP" {
+                map_line.insert_str(map_line.len(), " {IMP}");
+            } else if lookup.table[opcode as usize].addr_name == "IMM" {
+                value = self.read(addr);
+                addr += 1;
+                map_line.insert_str(map_line.len(), &format!(" ${:04x}, `{{`IMM`}}`", value)[..])
+            } else if lookup.table[opcode as usize].addr_name == "ZP" {
+                lo = self.read(addr);
+                addr += 1;
+                map_line.insert_str(map_line.len(), &format!(" ${:04x}, `{{`ZP`}}`", lo)[..])
+            } else if lookup.table[opcode as usize].addr_name == "ZPX" {
+                lo = self.read(addr);
+                addr += 1;
+                map_line.insert_str(map_line.len(), &format!(" ${:04x}, X `{{`ZPX`}}`", lo)[..])
+            } else if lookup.table[opcode as usize].addr_name == "ZPY" {
+                lo = self.read(addr);
+                addr += 1;
+                map_line.insert_str(map_line.len(), &format!(" ${:04x}, Y `{{`ZPY`}}`", lo)[..])
+            } else if lookup.table[opcode as usize].addr_name == "INDX" {
+                lo = self.read(addr);
+                addr += 1;
+                map_line.insert_str(
+                    map_line.len(),
+                    &format!(" ${:04x}, X) `{{`INDX`}}`", lo)[..],
+                )
+            } else if lookup.table[opcode as usize].addr_name == "INDY" {
+                lo = self.read(addr);
+                addr += 1;
+                map_line.insert_str(
+                    map_line.len(),
+                    &format!(" ${:04x}, Y) `{{`INDX`}}`", lo)[..],
+                )
+            } else if lookup.table[opcode as usize].addr_name == "ABS" {
+                lo = self.read(addr);
+                addr += 1;
+                hi = self.read(addr);
+                addr += 1;
+                map_line.insert_str(
+                    map_line.len(),
+                    &format!(" ${:04x}, `{{`ABS`}}`", ((hi as u16) << 8) | lo as u16)[..],
+                )
+            } else if lookup.table[opcode as usize].addr_name == "ABSX" {
+                lo = self.read(addr);
+                addr += 1;
+                hi = self.read(addr);
+                addr += 1;
+                map_line.insert_str(
+                    map_line.len(),
+                    &format!(" ${:04x}, X `{{`ABS`}}`", ((hi as u16) << 8) | lo as u16)[..],
+                )
+            } else if lookup.table[opcode as usize].addr_name == "ABSY" {
+                lo = self.read(addr);
+                addr += 1;
+                hi = self.read(addr);
+                addr += 1;
+                map_line.insert_str(
+                    map_line.len(),
+                    &format!(" ${:04x}, Y `{{`ABS`}}`", ((hi as u16) << 8) | lo as u16)[..],
+                )
+            } else if lookup.table[opcode as usize].addr_name == "ABSIND" {
+                lo = self.read(addr);
+                addr += 1;
+                hi = self.read(addr);
+                addr += 1;
+                map_line.insert_str(
+                    map_line.len(),
+                    &format!(" ${:04x}, `{{`ABSIND`}}`", ((hi as u16) << 8) | lo as u16)[..],
+                )
+            } else if lookup.table[opcode as usize].addr_name == "REL" {
+                value = self.read(addr);
+                addr += 1;
+                map_line.insert_str(
+                    map_line.len(),
+                    &format!(" ${:04x} [${:04x}] `{{`REL`}}`", value, addr)[..],
+                )
+            }
+            map_lines[line_addr as usize] = map_line;
+        }
+        map_lines
     }
 }
