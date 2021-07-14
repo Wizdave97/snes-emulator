@@ -4,8 +4,8 @@ use std::{cell::RefCell, rc::Rc};
 pub struct Instruction<'a> {
     pub name: &'a str,
     pub addr_name: &'a str,
-    pub operation: Box<dyn FnMut() -> u8 + 'a>,
-    pub address_mode: Box<dyn FnMut() -> u8 + 'a>,
+    pub operation: fn(&mut Cpu) -> u8,
+    pub address_mode: fn(&mut Cpu) -> u8,
     pub cycles: u8,
 }
 
@@ -15,7 +15,7 @@ pub struct LookUpTable<'a> {
 }
 
 impl<'a> LookUpTable<'a> {
-    pub fn new(cpu: &'a Rc<RefCell<Cpu>>) -> LookUpTable<'a> {
+    pub fn new() -> LookUpTable<'a> {
         LookUpTable {
             table: vec![
                 //ROW 0
@@ -23,3344 +23,1808 @@ impl<'a> LookUpTable<'a> {
                     name: "BRK",
                     cycles: 7,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().BRK())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::BRK,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "ORA",
                     cycles: 6,
                     addr_name: "INDX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ORA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INDX())
-                    },
+                    operation: Cpu::ORA,
+                    address_mode: Cpu::INDX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "ORA",
                     cycles: 3,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ORA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::ORA,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "ASL",
                     cycles: 5,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ASL())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::ASL,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "PHP",
                     cycles: 3,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().PHP())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::PHP,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "ORA",
                     cycles: 2,
                     addr_name: "IMM",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ORA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMM())
-                    },
+                    operation: Cpu::ORA,
+                    address_mode: Cpu::IMM,
                 },
                 Instruction {
                     name: "ASL",
                     cycles: 2,
                     addr_name: "ACC",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ASL())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ACC())
-                    },
+                    operation: Cpu::ASL,
+                    address_mode: Cpu::ACC,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "ORA",
                     cycles: 4,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ORA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::ORA,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "ASL",
                     cycles: 6,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ASL())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::ASL,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 // ROW 1
                 Instruction {
                     name: "BPL",
                     cycles: 2,
                     addr_name: "REL",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().BPL())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().REL())
-                    },
+                    operation: Cpu::BPL,
+                    address_mode: Cpu::REL,
                 },
                 Instruction {
                     name: "ORA",
                     cycles: 5,
                     addr_name: "INDY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ORA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INDY())
-                    },
+                    operation: Cpu::ORA,
+                    address_mode: Cpu::INDY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "ORA",
                     cycles: 4,
                     addr_name: "ZPX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ORA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPX())
-                    },
+                    operation: Cpu::ORA,
+                    address_mode: Cpu::ZPX,
                 },
                 Instruction {
                     name: "ASL",
                     cycles: 6,
                     addr_name: "ZPX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ASL())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPX())
-                    },
+                    operation: Cpu::ASL,
+                    address_mode: Cpu::ZPX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "CLC",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CLC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::CLC,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "ORA",
                     cycles: 4,
                     addr_name: "ABSY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ORA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSY())
-                    },
+                    operation: Cpu::ORA,
+                    address_mode: Cpu::ABSY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "ORA",
                     cycles: 4,
                     addr_name: "ABSX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ORA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSX())
-                    },
+                    operation: Cpu::ORA,
+                    address_mode: Cpu::ABSX,
                 },
                 Instruction {
                     name: "ASL",
                     cycles: 7,
                     addr_name: "ABSX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ASL())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSX())
-                    },
+                    operation: Cpu::ASL,
+                    address_mode: Cpu::ABSX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 // ROW 2
                 Instruction {
                     name: "JSR",
                     cycles: 6,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().JSR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::JSR,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "AND",
                     cycles: 6,
                     addr_name: "INDX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().AND())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INDX())
-                    },
+                    operation: Cpu::AND,
+                    address_mode: Cpu::INDX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "BIT",
                     cycles: 3,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().BIT())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::BIT,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "AND",
                     cycles: 3,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().AND())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::AND,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "ROL",
                     cycles: 5,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ROL())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::ROL,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "PLP",
                     cycles: 4,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().PLP())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::PLP,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "AND",
                     cycles: 2,
                     addr_name: "IMM",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().AND())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMM())
-                    },
+                    operation: Cpu::AND,
+                    address_mode: Cpu::IMM,
                 },
                 Instruction {
                     name: "ROL",
                     cycles: 2,
                     addr_name: "ACC",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ROL())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ACC())
-                    },
+                    operation: Cpu::ROL,
+                    address_mode: Cpu::ACC,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "BIT",
                     cycles: 4,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().BIT())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::BIT,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "AND",
                     cycles: 4,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().AND())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::AND,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "ROL",
                     cycles: 6,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ROL())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::ROL,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 // ROW 3
                 Instruction {
                     name: "BMI",
                     cycles: 2,
                     addr_name: "REL",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().BMI())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().REL())
-                    },
+                    operation: Cpu::BMI,
+                    address_mode: Cpu::REL,
                 },
                 Instruction {
                     name: "AND",
                     cycles: 5,
                     addr_name: "INDY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().AND())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INDY())
-                    },
+                    operation: Cpu::AND,
+                    address_mode: Cpu::INDY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "AND",
                     cycles: 4,
                     addr_name: "ZPX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().AND())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPX())
-                    },
+                    operation: Cpu::AND,
+                    address_mode: Cpu::ZPX,
                 },
                 Instruction {
                     name: "ROL",
                     cycles: 6,
                     addr_name: "ZPX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ROL())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPX())
-                    },
+                    operation: Cpu::ROL,
+                    address_mode: Cpu::ZPX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "SEC",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().SEC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::SEC,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "AND",
                     cycles: 4,
                     addr_name: "ABSY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().AND())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSY())
-                    },
+                    operation: Cpu::AND,
+                    address_mode: Cpu::ABSY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "AND",
                     cycles: 4,
                     addr_name: "ABSX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().AND())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSX())
-                    },
+                    operation: Cpu::AND,
+                    address_mode: Cpu::ABSX,
                 },
                 Instruction {
                     name: "ROL",
                     cycles: 7,
                     addr_name: "ABSX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ROL())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSX())
-                    },
+                    operation: Cpu::ROL,
+                    address_mode: Cpu::ABSX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 // ROW 4
                 Instruction {
                     name: "RTI",
                     cycles: 6,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().RTI())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::RTI,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "EOR",
                     cycles: 6,
                     addr_name: "INDX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().EOR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INDX())
-                    },
+                    operation: Cpu::EOR,
+                    address_mode: Cpu::INDX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "EOR",
                     cycles: 3,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().EOR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::EOR,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "LSR",
                     cycles: 5,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LSR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::LSR,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "PHA",
                     cycles: 3,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().PHA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::PHA,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "EOR",
                     cycles: 2,
                     addr_name: "IMM",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().EOR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMM())
-                    },
+                    operation: Cpu::EOR,
+                    address_mode: Cpu::IMM,
                 },
                 Instruction {
                     name: "LSR",
                     cycles: 2,
                     addr_name: "ACC",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LSR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ACC())
-                    },
+                    operation: Cpu::LSR,
+                    address_mode: Cpu::ACC,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "JMP",
                     cycles: 3,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().JMP())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::JMP,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "EOR",
                     cycles: 4,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().EOR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::EOR,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "LSR",
                     cycles: 6,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LSR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::LSR,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 // ROW 5
                 Instruction {
                     name: "BVC",
                     cycles: 2,
                     addr_name: "REL",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().BVC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().REL())
-                    },
+                    operation: Cpu::BVC,
+                    address_mode: Cpu::REL,
                 },
                 Instruction {
                     name: "EOR",
                     cycles: 5,
                     addr_name: "INDY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().EOR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INDY())
-                    },
+                    operation: Cpu::EOR,
+                    address_mode: Cpu::INDY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "EOR",
                     cycles: 4,
                     addr_name: "ZPX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().EOR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPX())
-                    },
+                    operation: Cpu::EOR,
+                    address_mode: Cpu::ZPX,
                 },
                 Instruction {
                     name: "LSR",
                     cycles: 6,
                     addr_name: "ZPX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LSR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPX())
-                    },
+                    operation: Cpu::LSR,
+                    address_mode: Cpu::ZPX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "CLI",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CLI())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::CLI,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "EOR",
                     cycles: 4,
                     addr_name: "ABSY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().EOR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSY())
-                    },
+                    operation: Cpu::EOR,
+                    address_mode: Cpu::ABSY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "EOR",
                     cycles: 4,
                     addr_name: "ABSX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().EOR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSX())
-                    },
+                    operation: Cpu::EOR,
+                    address_mode: Cpu::ABSX,
                 },
                 Instruction {
                     name: "LSR",
                     cycles: 7,
                     addr_name: "ABSX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LSR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSX())
-                    },
+                    operation: Cpu::LSR,
+                    address_mode: Cpu::ABSX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 // ROW 6
                 Instruction {
                     name: "RTS",
                     cycles: 6,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().RTS())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::RTS,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "ADC",
                     cycles: 6,
                     addr_name: "INDX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ADC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INDX())
-                    },
+                    operation: Cpu::ADC,
+                    address_mode: Cpu::INDX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "ADC",
                     cycles: 3,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ADC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::ADC,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "ROR",
                     cycles: 5,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ROR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::ROR,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "PLA",
                     cycles: 4,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().PLA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::PLA,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "ADC",
                     cycles: 2,
                     addr_name: "IMM",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ADC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMM())
-                    },
+                    operation: Cpu::ADC,
+                    address_mode: Cpu::IMM,
                 },
                 Instruction {
                     name: "ROR",
                     cycles: 2,
                     addr_name: "ACC",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ROR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ACC())
-                    },
+                    operation: Cpu::ROR,
+                    address_mode: Cpu::ACC,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "JMP",
                     cycles: 5,
                     addr_name: "ABSIND",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().JMP())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSIND())
-                    },
+                    operation: Cpu::JMP,
+                    address_mode: Cpu::ABSIND,
                 },
                 Instruction {
                     name: "ADC",
                     cycles: 4,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ADC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::ADC,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "ROR",
                     cycles: 6,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ROR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::ROR,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 // ROW 7
                 Instruction {
                     name: "BVS",
                     cycles: 2,
                     addr_name: "REL",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().BVS())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().REL())
-                    },
+                    operation: Cpu::BVS,
+                    address_mode: Cpu::REL,
                 },
                 Instruction {
                     name: "ADC",
                     cycles: 5,
                     addr_name: "INDY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ADC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INDY())
-                    },
+                    operation: Cpu::ADC,
+                    address_mode: Cpu::INDY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "ADC",
                     cycles: 4,
                     addr_name: "ZPX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ADC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPX())
-                    },
+                    operation: Cpu::ADC,
+                    address_mode: Cpu::ZPX,
                 },
                 Instruction {
                     name: "ROR",
                     cycles: 6,
                     addr_name: "ZPX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ROR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPX())
-                    },
+                    operation: Cpu::ROR,
+                    address_mode: Cpu::ZPX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "SEI",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().SEI())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::SEI,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "ADC",
                     cycles: 4,
                     addr_name: "ABSY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ADC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSY())
-                    },
+                    operation: Cpu::ADC,
+                    address_mode: Cpu::ABSY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "ADC",
                     cycles: 4,
                     addr_name: "ABSX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ADC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSX())
-                    },
+                    operation: Cpu::ADC,
+                    address_mode: Cpu::ABSX,
                 },
                 Instruction {
                     name: "ROR",
                     cycles: 7,
                     addr_name: "ABSX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ROR())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSX())
-                    },
+                    operation: Cpu::ROR,
+                    address_mode: Cpu::ABSX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 // ROW 8
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "STA",
                     cycles: 6,
                     addr_name: "INDX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().STA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INDX())
-                    },
+                    operation: Cpu::STA,
+                    address_mode: Cpu::INDX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "STY",
                     cycles: 3,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().STY())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::STY,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "STA",
                     cycles: 3,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().STA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::STA,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "STX",
                     cycles: 3,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().STX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::STX,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "DEY",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().DEY())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::DEY,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "TXA",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().TXA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::TXA,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "STY",
                     cycles: 4,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().STY())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::STY,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "STA",
                     cycles: 4,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().STA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::STA,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "STX",
                     cycles: 4,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().STX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::STX,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 // ROW 9
                 Instruction {
                     name: "BCC",
                     cycles: 2,
                     addr_name: "REL",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().BCC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().REL())
-                    },
+                    operation: Cpu::BCC,
+                    address_mode: Cpu::REL,
                 },
                 Instruction {
                     name: "STA",
                     cycles: 6,
                     addr_name: "INDY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().STA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INDY())
-                    },
+                    operation: Cpu::STA,
+                    address_mode: Cpu::INDY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "STY",
                     cycles: 4,
                     addr_name: "ZPX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().STY())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPX())
-                    },
+                    operation: Cpu::STY,
+                    address_mode: Cpu::ZPX,
                 },
                 Instruction {
                     name: "STA",
                     cycles: 4,
                     addr_name: "ZPX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().STA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPX())
-                    },
+                    operation: Cpu::STA,
+                    address_mode: Cpu::ZPX,
                 },
                 Instruction {
                     name: "STX",
                     cycles: 4,
                     addr_name: "ZPY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().STX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPY())
-                    },
+                    operation: Cpu::STX,
+                    address_mode: Cpu::ZPY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "TYA",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().TYA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::TYA,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "STA",
                     cycles: 5,
                     addr_name: "ABSY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().STA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSY())
-                    },
+                    operation: Cpu::STA,
+                    address_mode: Cpu::ABSY,
                 },
                 Instruction {
                     name: "TXS",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().TXS())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::TXS,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "STA",
                     cycles: 5,
                     addr_name: "ABSX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().STA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSX())
-                    },
+                    operation: Cpu::STA,
+                    address_mode: Cpu::ABSX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 // ROW A
                 Instruction {
                     name: "LDY",
                     cycles: 2,
                     addr_name: "IMM",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDY())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMM())
-                    },
+                    operation: Cpu::LDY,
+                    address_mode: Cpu::IMM,
                 },
                 Instruction {
                     name: "LDA",
                     cycles: 6,
                     addr_name: "INDX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INDX())
-                    },
+                    operation: Cpu::LDA,
+                    address_mode: Cpu::INDX,
                 },
                 Instruction {
                     name: "LDX",
                     cycles: 2,
                     addr_name: "IMM",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMM())
-                    },
+                    operation: Cpu::LDX,
+                    address_mode: Cpu::IMM,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "LDY",
                     cycles: 3,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDY())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::LDY,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "LDA",
                     cycles: 3,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::LDA,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "LDX",
                     cycles: 3,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::LDX,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "TAY",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().TAY())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::TAY,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "LDA",
                     cycles: 2,
                     addr_name: "IMM",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMM())
-                    },
+                    operation: Cpu::LDA,
+                    address_mode: Cpu::IMM,
                 },
                 Instruction {
                     name: "TAX",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().TAX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::TAX,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "LDY",
                     cycles: 4,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDY())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::LDY,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "LDA",
                     cycles: 4,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::LDA,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "LDX",
                     cycles: 4,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::LDX,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 // ROW B
                 Instruction {
                     name: "BCS",
                     cycles: 2,
                     addr_name: "REL",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().BCS())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().REL())
-                    },
+                    operation: Cpu::BCS,
+                    address_mode: Cpu::REL,
                 },
                 Instruction {
                     name: "LDA",
                     cycles: 5,
                     addr_name: "INDY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INDY())
-                    },
+                    operation: Cpu::LDA,
+                    address_mode: Cpu::INDY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "LDY",
                     cycles: 4,
                     addr_name: "ZPX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDY())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPX())
-                    },
+                    operation: Cpu::LDY,
+                    address_mode: Cpu::ZPX,
                 },
                 Instruction {
                     name: "LDA",
                     cycles: 4,
                     addr_name: "ZPX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPX())
-                    },
+                    operation: Cpu::LDA,
+                    address_mode: Cpu::ZPX,
                 },
                 Instruction {
                     name: "LDX",
                     cycles: 4,
                     addr_name: "ZPY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPY())
-                    },
+                    operation: Cpu::LDX,
+                    address_mode: Cpu::ZPY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "CLV",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CLV())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::CLV,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "LDA",
                     cycles: 4,
                     addr_name: "ABSY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSY())
-                    },
+                    operation: Cpu::LDA,
+                    address_mode: Cpu::ABSY,
                 },
                 Instruction {
                     name: "TSX",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().TSX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::TSX,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "LDY",
                     cycles: 4,
                     addr_name: "ABSX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDY())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSX())
-                    },
+                    operation: Cpu::LDY,
+                    address_mode: Cpu::ABSX,
                 },
                 Instruction {
                     name: "LDA",
                     cycles: 4,
                     addr_name: "ABSX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDA())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSX())
-                    },
+                    operation: Cpu::LDA,
+                    address_mode: Cpu::ABSX,
                 },
                 Instruction {
                     name: "LDX",
                     cycles: 4,
                     addr_name: "ABSY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().LDX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSY())
-                    },
+                    operation: Cpu::LDX,
+                    address_mode: Cpu::ABSY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 // ROW C
                 Instruction {
                     name: "CPY",
                     cycles: 2,
                     addr_name: "IMM",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CPY())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMM())
-                    },
+                    operation: Cpu::CPY,
+                    address_mode: Cpu::IMM,
                 },
                 Instruction {
                     name: "CMP",
                     cycles: 6,
                     addr_name: "INDX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CMP())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INDX())
-                    },
+                    operation: Cpu::CMP,
+                    address_mode: Cpu::INDX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "CPY",
                     cycles: 3,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CPY())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::CPY,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "CMP",
                     cycles: 3,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CMP())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::CMP,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "DEC",
                     cycles: 5,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().DEC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::DEC,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "INY",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INY())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::INY,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "CMP",
                     cycles: 2,
                     addr_name: "IMM",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CMP())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMM())
-                    },
+                    operation: Cpu::CMP,
+                    address_mode: Cpu::IMM,
                 },
                 Instruction {
                     name: "DEX",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().DEX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::DEX,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "CPY",
                     cycles: 4,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CPY())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::CPY,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "CMP",
                     cycles: 4,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CMP())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::CMP,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "DEC",
                     cycles: 6,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().DEC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::DEC,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 //ROW D
                 Instruction {
                     name: "BNE",
                     cycles: 2,
                     addr_name: "REL",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().BNE())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().REL())
-                    },
+                    operation: Cpu::BNE,
+                    address_mode: Cpu::REL,
                 },
                 Instruction {
                     name: "CMP",
                     cycles: 5,
                     addr_name: "INDY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CMP())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INDY())
-                    },
+                    operation: Cpu::CMP,
+                    address_mode: Cpu::INDY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "CMP",
                     cycles: 4,
                     addr_name: "ZPX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CMP())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPX())
-                    },
+                    operation: Cpu::CMP,
+                    address_mode: Cpu::ZPX,
                 },
                 Instruction {
                     name: "DEC",
                     cycles: 6,
                     addr_name: "ZPX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().DEC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPX())
-                    },
+                    operation: Cpu::DEC,
+                    address_mode: Cpu::ZPX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "CLD",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CLD())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::CLD,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "CMP",
                     cycles: 4,
                     addr_name: "ABSY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CMP())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSY())
-                    },
+                    operation: Cpu::CMP,
+                    address_mode: Cpu::ABSY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "CMP",
                     cycles: 4,
                     addr_name: "ABSX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CMP())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSX())
-                    },
+                    operation: Cpu::CMP,
+                    address_mode: Cpu::ABSX,
                 },
                 Instruction {
                     name: "DEC",
                     cycles: 7,
                     addr_name: "ABSX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().DEC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSX())
-                    },
+                    operation: Cpu::DEC,
+                    address_mode: Cpu::ABSX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 //ROW E
                 Instruction {
                     name: "CPX",
                     cycles: 2,
                     addr_name: "IMM",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CPX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMM())
-                    },
+                    operation: Cpu::CPX,
+                    address_mode: Cpu::IMM,
                 },
                 Instruction {
                     name: "SBC",
                     cycles: 6,
                     addr_name: "INDX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().SBC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INDX())
-                    },
+                    operation: Cpu::SBC,
+                    address_mode: Cpu::INDX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "CPX",
                     cycles: 3,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CPX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::CPX,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "SBC",
                     cycles: 3,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().SBC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::SBC,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "INC",
                     cycles: 5,
                     addr_name: "ZP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZP())
-                    },
+                    operation: Cpu::INC,
+                    address_mode: Cpu::ZP,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "INX",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::INX,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "SBC",
                     cycles: 2,
                     addr_name: "IMM",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().SBC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMM())
-                    },
+                    operation: Cpu::SBC,
+                    address_mode: Cpu::IMM,
                 },
                 Instruction {
                     name: "NOP",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().NOP())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::NOP,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "CPX",
                     cycles: 4,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().CPX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::CPX,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "SBC",
                     cycles: 4,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().SBC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::SBC,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "INC",
                     cycles: 6,
                     addr_name: "ABS",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABS())
-                    },
+                    operation: Cpu::INC,
+                    address_mode: Cpu::ABS,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 //ROW F
                 Instruction {
                     name: "BEQ",
                     cycles: 2,
                     addr_name: "REL",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().BEQ())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().REL())
-                    },
+                    operation: Cpu::BEQ,
+                    address_mode: Cpu::REL,
                 },
                 Instruction {
                     name: "SBC",
                     cycles: 5,
                     addr_name: "INDY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().SBC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INDY())
-                    },
+                    operation: Cpu::SBC,
+                    address_mode: Cpu::INDY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "SBC",
                     cycles: 4,
                     addr_name: "ZPX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().SBC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPX())
-                    },
+                    operation: Cpu::SBC,
+                    address_mode: Cpu::ZPX,
                 },
                 Instruction {
                     name: "INC",
                     cycles: 6,
                     addr_name: "ZPX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ZPX())
-                    },
+                    operation: Cpu::INC,
+                    address_mode: Cpu::ZPX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "SED",
                     cycles: 2,
                     addr_name: "IMP",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().SED())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().IMP())
-                    },
+                    operation: Cpu::SED,
+                    address_mode: Cpu::IMP,
                 },
                 Instruction {
                     name: "SBC",
                     cycles: 4,
                     addr_name: "ABSY",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().SBC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSY())
-                    },
+                    operation: Cpu::SBC,
+                    address_mode: Cpu::ABSY,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
                 Instruction {
                     name: "SBC",
                     cycles: 4,
                     addr_name: "ABSX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().SBC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSX())
-                    },
+                    operation: Cpu::SBC,
+                    address_mode: Cpu::ABSX,
                 },
                 Instruction {
                     name: "INC",
                     cycles: 7,
                     addr_name: "ABSX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().INC())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().ABSX())
-                    },
+                    operation: Cpu::INC,
+                    address_mode: Cpu::ABSX,
                 },
                 Instruction {
                     name: "???",
                     cycles: 0,
                     addr_name: "XXX",
-                    operation: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
-                    address_mode: {
-                        let cpu_clone = Rc::clone(&cpu);
-                        Box::new(move || cpu_clone.borrow_mut().XXX())
-                    },
+                    operation: Cpu::XXX,
+                    address_mode: Cpu::XXX,
                 },
             ],
         }
