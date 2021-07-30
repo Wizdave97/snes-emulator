@@ -2,5 +2,5 @@
 
 members = [
     "cpu",
-    "emu"
+    "cpu-test"
 ]

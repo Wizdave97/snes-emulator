@@ -1,15 +1,12 @@
 [package]
-name = "cpu"
-version = "0.1.0"
 authors = ["david <wizdave97@gmail.com>"]
 edition = "2018"
+name = "cpu"
+version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-amethyst = {version = "0.15.2", features = ["no-slow-safety-checks"]}
+piston_window = "0.120.0"
 find_folder = "0.3.0"
 
-[features]
-default = ["vulkan"]
-vulkan = ["amethyst/vulkan"]

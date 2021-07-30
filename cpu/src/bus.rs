@@ -1,8 +1,8 @@
-const RAM_SIZE: usize = 64 * 1024;
+pub const RAM_SIZE: usize = 64 * 1024;
 
 #[derive(Debug, Clone)]
 pub struct Bus {
-    ram: [u8; RAM_SIZE]
+    pub ram: [u8; RAM_SIZE]
 }
 impl Bus {
     pub fn new() -> Self {

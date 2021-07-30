@@ -1,5 +1,5 @@
 [package]
-name = "emu"
+name = "cpu-test"
 version = "0.1.0"
 authors = ["david <wizdave97@gmail.com>"]
 edition = "2018"
@@ -8,3 +8,5 @@ edition = "2018"
 
 [dependencies]
 cpu = {path = '../cpu'}
+piston_window = "0.120.0"
+find_folder = "0.3.0"
